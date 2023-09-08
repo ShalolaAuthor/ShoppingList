@@ -1,0 +1,3 @@
+packages = ["pandas", "requests", "pyodide-http"]
+#[splashscreen]
+#    enabled = false
