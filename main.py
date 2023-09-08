@@ -105,6 +105,7 @@ def generate_shopping_list():
 
         #code
         item_id = get_ID(item_properties["Item Name"])
+        item_name = item_properties["Item Name"]
         if(item_id == "Nope"):
             continue
         userElement = js.document.getElementById('data_center')
@@ -124,6 +125,7 @@ def generate_shopping_list():
             final_data = pd.concat([final_data, new_row.to_frame().T], ignore_index=True)
             #final_data = final_data.append(df.iloc[i], ignore_index=True)
             i+=1
+        final_data.replace(to_replace= item_name, value = item_name.title(), inplace=True )
     js.document.getElementById("table_area").innerHTML = ""
     final_data = final_data.sort_values(by=["World Name", "Item Name"])
     with pd.option_context("display.max_rows", None, 
