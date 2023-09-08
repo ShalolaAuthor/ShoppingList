@@ -107,7 +107,10 @@ def generate_shopping_list():
         item_id = get_ID(item_properties["Item Name"])
         if(item_id == "Nope"):
             continue
-        df = request_stuffs_to_universalis(item_ids=get_ID(item_properties["Item Name"]))
+        userElement = js.document.getElementById('data_center')
+        input_data = userElement.value
+
+        df = request_stuffs_to_universalis(item_ids=get_ID(item_properties["Item Name"]), world_dc_region=input_data)
         #print(df)
         needed_amount = int(item_properties["Item Amounts"])
         listings_amount = df["Item Quantity"].to_list()
