@@ -13,7 +13,7 @@ def get_itemNameID():
     itemNameID = {}
 
     for stuffs in dataFilter:
-        itemNameID[str(stuffs)] = rawData[str(stuffs)]["en"]
+        itemNameID[str(stuffs)] = rawData[str(stuffs)]["en"].lower()
     return itemNameID
 
 itemNameID = get_itemNameID()
@@ -31,7 +31,7 @@ def generate_team_craft_data_frame():
         #print(line)
         if re.search(r"[0-9]", line):
             items = line.split("x ", 1)
-            item_names.append(items[1].strip("\n"))
+            item_names.append(items[1].strip("\n").lower())
             item_amounts.append(items[0])
 
     data = {
