@@ -1,4 +1,4 @@
-# ShoppingList
+# [ShoppingList](https://shalolaauthor.github.io/ShoppingList/)
 
 Just a simple script to convert order list to shopping list
 ![image](https://github.com/ShalolaAuthor/ShoppingList/assets/124796924/cb9fe3b1-a48f-44b9-bcb5-a56ded07558d)
