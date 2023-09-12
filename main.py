@@ -127,6 +127,7 @@ def generate_shopping_list():
             i+=1
         final_data.replace(to_replace= item_name, value = item_name.title(), inplace=True )
     js.document.getElementById("table_area").innerHTML = ""
+    js.document.getElementById("total_area").innerHTML = final_data["Item Price Total"].sum()
     final_data = final_data.sort_values(by=["World Name", "Item Name"])
     with pd.option_context("display.max_rows", None, 
                            "display.max_columns", None,
