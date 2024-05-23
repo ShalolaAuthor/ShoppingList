@@ -1,25 +1,21 @@
-import requests
-import re
+from pyscript import document
+from pyscript import display
+from js import console
 import pandas as pd
-import js
+import requests
+import urllib3
+import re
 
-def get_itemNameID():
-    teamCraftListURL = "https://raw.githubusercontent.com/ffxiv-teamcraft/ffxiv-teamcraft/staging/libs/data/src/lib/json/items.json"
-    UniversalisURL = "https://universalis.app/api/v2/marketable"
+urllib3.disable_warnings()
 
-    rawData = requests.get(url = teamCraftListURL).json()
-    dataFilter = requests.get(url = UniversalisURL).json()
+rawData = requests.get(url = "https://raw.githubusercontent.com/ffxiv-teamcraft/ffxiv-teamcraft/staging/libs/data/src/lib/json/items.json").json()
+dataFilter = requests.get(url = "https://universalis.app/api/v2/marketable").json()
+itemNameID = {}
+for stuffs in dataFilter:
+    itemNameID[str(stuffs)] = rawData[str(stuffs)]["en"].lower()
 
-    itemNameID = {}
-
-    for stuffs in dataFilter:
-        itemNameID[str(stuffs)] = rawData[str(stuffs)]["en"].lower()
-    return itemNameID
-
-itemNameID = get_itemNameID()
-
-def generate_team_craft_data_frame():
-    userElement = js.document.getElementById('userInput')
+def generateTeamCraftDataFrame():
+    userElement = document.querySelector("#userInput")
     input_data = userElement.value
 
     input_data = input_data.split("\n")
@@ -42,13 +38,13 @@ def generate_team_craft_data_frame():
     team_craft_data_frame = pd.DataFrame(data)
     return team_craft_data_frame
 
-def request_stuffs_to_universalis(listings_limit= "100", item_ids = "5107", world_dc_region = "Light"):
+def requestStuffstoUniversalis(listings_limit= "100", item_ids = "5107", world_dc_region = "Light"):
 
     UniversalisEndPoint = "https://universalis.app/api/v2/"
     
     UniversalisURL = UniversalisEndPoint + world_dc_region + "/" + item_ids + "?listings=" + listings_limit
     
-    dumps = requests.get(url = UniversalisURL).json()
+    dumps = requests.get(UniversalisURL).json()
 
     world_names = []
     item_quantities = []
@@ -83,19 +79,19 @@ def request_stuffs_to_universalis(listings_limit= "100", item_ids = "5107", worl
     #df.set_index("Item Price Per Unit", inplace=True)
     return df
 
-def get_ID(val):
+def getID(val):
     for key, value in itemNameID.items():
         if val == value:
             return key
  
     return "Nope"
 
-def generate_shopping_list():
+def generateShoppingList(event):
     #init
     final_data = pd.DataFrame(columns=["World Name", "Item Quantity", "Item Price Per Unit", "Item Price Total", "Item Name"])
     #print(itemNameID)
 
-    dict_teamcraft = generate_team_craft_data_frame().to_dict("records")
+    dict_teamcraft = generateTeamCraftDataFrame().to_dict("records")
 
     for item_properties in dict_teamcraft:
         #name to id test
@@ -104,14 +100,14 @@ def generate_shopping_list():
         #print(get_ID(item_properties["Item Name"]))
 
         #code
-        item_id = get_ID(item_properties["Item Name"])
+        item_id = getID(item_properties["Item Name"])
         item_name = item_properties["Item Name"]
         if(item_id == "Nope"):
             continue
-        userElement = js.document.getElementById('data_center')
+        userElement = document.querySelector("#dataCenter")        
         input_data = userElement.value
 
-        df = request_stuffs_to_universalis(item_ids=get_ID(item_properties["Item Name"]), world_dc_region=input_data)
+        df = requestStuffstoUniversalis(item_ids=getID(item_properties["Item Name"]), world_dc_region=input_data)
         #print(df)
         needed_amount = int(item_properties["Item Amounts"])
         listings_amount = df["Item Quantity"].to_list()
@@ -126,11 +122,13 @@ def generate_shopping_list():
             #final_data = final_data.append(df.iloc[i], ignore_index=True)
             i+=1
         final_data.replace(to_replace= item_name, value = item_name.title(), inplace=True )
-    js.document.getElementById("table_area").innerHTML = ""
-    js.document.getElementById("total_area").innerHTML = final_data["Item Price Total"].sum()
+    
+    isLoading = False
+    document.querySelector("#totalCostHeader").innerHTML = "Total Cost:"
+    document.querySelector("#totalAmmount").innerHTML = final_data["Item Price Total"].sum()
     final_data = final_data.sort_values(by=["World Name", "Item Name"])
     with pd.option_context("display.max_rows", None, 
                            "display.max_columns", None,
                            "display.precision", 3):
-        display(final_data, target="table_area", append=False)
+        display(final_data, target="totalArea", append=False)
     
